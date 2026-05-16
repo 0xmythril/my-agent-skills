@@ -72,6 +72,10 @@ Extra keys are included only when they help a specific runtime and are safe for 
 | --- | --- |
 | [babysit-github-pr](skills/babysit-github-pr/SKILL.md) | Poll a GitHub PR, post cycle comments, fix actionable review/CI issues until merge-ready or limits hit. |
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add skills, frontmatter rules (Cursor / Claude Code / Hermes), and a pre-merge checklist.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
