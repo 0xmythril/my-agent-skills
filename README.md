@@ -71,6 +71,7 @@ Extra keys are included only when they help a specific runtime and are safe for 
 | Skill | Summary |
 | --- | --- |
 | [babysit-github-pr](skills/babysit-github-pr/SKILL.md) | Poll a GitHub PR, post cycle comments, fix actionable review/CI issues until merge-ready or limits hit. |
+| [promote-branch-pr](skills/promote-branch-pr/SKILL.md) | Compare two branches, open a promotion PR if the target is behind, and optionally hand off to babysit-github-pr. |
 
 ## Contributing
 
