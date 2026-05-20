@@ -107,11 +107,17 @@ Evaluate in priority order:
 | Condition | Action |
 | --- | --- |
 | PR merged/closed | Post final summary, exit |
-| Mergeable + CI green + 0 unresolved | Post final summary, exit |
+| Mergeable + CI green + 0 unresolved | Post final summary, **exit and tell user the PR is ready for them to merge** |
 | `consecutive_unresolved_runs >= stop_after_unresolved_runs` | Post final summary, exit |
 | Elapsed >= `duration` | Post final summary, exit |
 | Merge conflicts needing human judgment | Post final summary, exit |
 | Otherwise | Sleep `interval`, continue |
+
+## Agent autonomy boundary
+
+- **Monitor**, **fix**, and **report** only.
+- **Never merge** the PR — even if it is fully green and approved. Leave that decision to the user.
+- **Never push to target/base branch** directly — only push to the PR head branch.
 
 ## Final summary comment
 

@@ -2,14 +2,13 @@
 name: promote-branch-pr
 version: 1.0.0
 description: >-
-  Compare two branches in a GitHub repo, report how far the target is behind,
-  and open a promotion pull request if one does not already exist.
-  Use when the user asks to promote, sync, or forward-port one branch into
-  another (e.g. staging → sandbox) and optionally monitor the resulting PR.
+  Compare two branches in a remote GitHub repo, report the delta, and create a
+  promotion PR if the target is behind. Works standalone; optionally hands off
+  to babysit-github-pr after user confirmation.
 metadata:
   hermes:
     tags: [github, pull-request, branch-promotion, devops, gh-cli]
-    category: devops
+    category: github
     requires_toolsets: [terminal]
     related_skills: [github-pr-workflow, babysit-github-pr]
 ---
@@ -172,11 +171,21 @@ Then ask:
 
 > "PR created. Run babysit-github-pr to monitor it? (yes/no)"
 
-- If user says **yes** (or `auto_babysit=true`):
+  - If user says **yes** (or `auto_babysit=true`):
   - Invoke `babysit-github-pr` with `pr_url=$PR_URL`.
   - Pass sensible defaults: `duration=2h`, `interval=10m`.
+  - **NEVER merge the PR yourself** — leave it merge-ready for the user to merge.
 - If user says **no**:
   - Report `"Done. PR is open at PR_URL."` and **exit**.
+
+## Agent autonomy boundary
+
+- **Create** the PR if it doesn't exist.
+- **Monitor** it if asked (via `babysit-github-pr`).
+- **Resolve** merge conflicts, review comments, and CI failures.
+- **Report** when the PR is merge-ready.
+- **NEVER merge** the PR into the target branch. That action belongs to the user.
+
 
 ## Standalone guarantee
 
@@ -191,4 +200,52 @@ This skill never depends on `babysit-github-pr` being present. If the user decli
 | Open PR already exists | Report it, ask to babysit, do not duplicate |
 | `COMMIT_COUNT == 0` | Report up-to-date, exit |
 | PR creation fails (permissions, rules) | Report raw error, exit |
+| PR is `CONFLICTING`/`DIRTY` | **Trivial/format drift only:** Resolve locally (see below), then re-check. **Non-trivial:** Halt and ask user for guidance. |
 | `gh` missing and no `GITHUB_TOKEN` | Fail fast with auth setup instructions |
+
+## Resolving trivial merge conflicts (format drift)
+
+Promotion PRs often become `CONFLICTING` due to biome/format/style drift on `target` (e.g. sandbox had formatting-only changes that diverged from `source`). These are safe to resolve mechanically without human review.
+
+### Detection
+After finding an existing PR, check its merge state:
+```bash
+gh pr view $PR_NUM --repo $OWNER/$REPO --json mergeStateStatus,mergeable
+```
+If `mergeable: CONFLICTING` and the repo uses automated formatters (Biome, Prettier, ESLint), the conflicts are likely trivial.
+
+### Resolution workflow
+
+1. **Ensure the repo is cloned locally** and `origin` points to the remote:
+   ```bash
+   git fetch origin $source $target
+   ```
+
+2. **Checkout the source branch** and merge target into it:
+   ```bash
+   git checkout $source
+   git merge origin/$target --no-edit
+   ```
+
+3. **Accept the source branch versions** for all conflicted files:
+   ```bash
+   git checkout --ours <file1> <file2> ...
+   # or accept all conflicts programmatically:
+   git diff --name-only --diff-filter=U | xargs git checkout --ours
+   ```
+
+4. **Commit and push**:
+   ```bash
+   git add -A
+   git commit -m "chore: resolve $target→$source promotion conflicts"
+   git push origin $source
+   ```
+
+5. **Re-check the PR** — it should flip to `MERGEABLE`.
+
+### Pitfalls
+- `--ours` vs `--theirs` is counterintuitive during a merge: `--ours` means the branch you checked out (source), `--theirs` means the branch you merged in (target). For promotion PRs, always accept **source** (`--ours`) because source is the source of truth.
+- Do NOT use `--force` when pushing the resolved source branch.
+- If conflicts are in non-formatting files (logic, types, schemas), stop and ask the user before resolving.
+
+See `references/resolve-promotion-conflicts.md` for a worked example from the `mocaverse/air-agent-services` repo.
