@@ -4,3 +4,7 @@
 .dev.vars
 .dev.vars.*
 .secrets/
+
+# Python bytecode from running skill scripts / tests.
+__pycache__/
+*.py[cod]
