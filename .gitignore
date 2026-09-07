@@ -1,0 +1,6 @@
+# Runtime credentials belong outside this skills repository.
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+.secrets/
