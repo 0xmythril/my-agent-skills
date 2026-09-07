@@ -123,6 +123,27 @@ Store state in JSON files with atomic writes. Track:
 - Error fingerprints for classification and backoff
 - Rolling history arrays (trimmed to N most recent)
 
+### State directory convention
+
+Default base directory used by the examples and `scripts/state_helper.py`:
+
+```text
+~/.cron-state/            # base dir
+    state/<job_id>.json   # per-job JSON state (when using state_helper.py)
+    runs.jsonl            # append-only run log across all jobs
+```
+
+For ad-hoc scripts (like the "Smart Website Monitor" example below), state files can also live flat at `~/.cron-state/<job>.json` — the shape is up to the script.
+
+Override the base directory with the `CRON_STATE_DIR` environment variable:
+
+```bash
+# Hermes-specific example (only if you run under Hermes):
+export CRON_STATE_DIR="$HOME/.hermes/cron"
+```
+
+Any absolute path works; the Hermes path above is just an example.
+
 ## Reproducible Build Patterns
 
 For cron jobs that need to set up an environment before each run, use the digest-based reproducible pattern:
@@ -135,9 +156,9 @@ See `references/digest-implementation-pattern.md` for a full worked example.
 
 ## Integration with Other Skills
 
-- **`web-content-monitoring`** — use for content change detection patterns
-- Replace polling with push/webhook events where possible
-- Combine with calendar/ticket parsing when monitoring event-driven sources
+- **Content change detection** — if you also install a dedicated content-monitoring skill (e.g. a hypothetical `web-content-monitoring`, not shipped in this repo), delegate the "did this page change" step there and keep this skill focused on scheduling, state, and adaptation.
+- Replace polling with push/webhook events where possible.
+- Combine with calendar/ticket parsing when monitoring event-driven sources.
 
 ## Full Example: Smart Website Monitor
 
