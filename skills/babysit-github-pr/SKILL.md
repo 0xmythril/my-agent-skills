@@ -46,7 +46,7 @@ If `pr_url` is missing, stop and ask the user for it.
 
 Run every `interval`, up to `duration`.
 
-**Cycle guard — before step 1, every cycle:** re-check the working tree is clean (`git status --porcelain`). If it is dirty, halt with a status comment per the Rules — do not risk `git add -A` bundling unrelated changes into the cycle commit. (Prerequisites only check this once; the guard enforces it on each iteration.)
+**Cycle guard — before step 1, every cycle:** re-check the working tree is clean (`git status --porcelain`). If it is dirty, halt with a status comment per the Rules — the cycle commit uses path-scoped `git add -u` / explicit paths (step 3), but a pre-existing dirty tree still points at drift the skill did not intend to ship. (Prerequisites only check this once; the guard enforces it on each iteration.)
 
 ### 1. Fetch state
 
@@ -99,15 +99,25 @@ Record every non-actionable item's ID in the matching `seen_*` set (step 4) and 
 For actionable items in this cycle:
 
 1. Apply all fixes locally.
-2. Commit as exactly ONE commit per cycle:
+2. Commit as exactly ONE commit per cycle. **Stage only files this cycle actually
+   touched** — the per-cycle dirty-tree guard proves the working tree was clean at cycle
+   start, but `git add -A` would still sweep in anything else you happened to create
+   this cycle (frame extractions, scratch scripts, `.DS_Store`, editor swap files). Use
+   `git add -u` for edits to tracked files, or list the explicit paths the fixes
+   touched:
 
    ```bash
-   git add -A
+   git add -u                             # tracked files modified this cycle
+   git add path/to/new_file.py …          # any newly created files the fix required
    git commit -m "address review feedback (babysit cycle N)
 
    - <fix 1>
    - <fix 2>"
    ```
+
+   Never `git add -A` and never `git add .` from the repo root — a stray artifact
+   silently entering the review commit is the exact failure the dirty-tree guard is
+   trying to prevent.
 
 3. Push. Never use `--force` unless `allow_force_push` is true:
 
@@ -183,6 +193,7 @@ Post with a distinct prefix:
 - **One commit per cycle.** Multiple fixes batch into one commit; multiple cycles produce multiple commits. Never amend or rebase across cycles.
 - **Never force-push** unless explicitly allowed.
 - **Resolve bot threads you fully addressed** (reply first, then `resolveReviewThread`) so the PR can reach merge-ready under required conversation resolution. **Never resolve** threads you didn't address or human-discussion threads — reply and leave those for a human.
+- **Thread-resolve policy, explicit tradeoff:** resolve *only* bot threads this skill fully fixed; leave every human thread and every ambiguous thread open. The alternative — "never resolve programmatically" — is safer but on repos that enforce conversation resolution it makes `mergeStateStatus: CLEAN` unreachable, so every run times out even after all fixes ship. The current rule accepts a narrow false-positive risk on bot threads to keep merge-ready reachable; if a repo bans it, override to `never resolve`.
 - **Skip non-actionable comments** — note in final summary.
 - **Don't double-fix.** Before applying, check prior `🤖 [babysit ...]` comments in this session.
 - **Dirty working tree at cycle start** → halt with status comment, don't risk committing unrelated changes.
