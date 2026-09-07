@@ -153,3 +153,18 @@ ffmpeg -y -v error -f concat -safe 0 -i parts.txt -c copy OUT.mp4
   `No such filter: ''`. The generator never emits them.
 - **Declaring the job done without viewing the output.** The deliverable is a file the
   user will publish. Look at it first.
+
+## Regression tests
+
+`test_build_filtergraph.py` covers the failure modes the generator exists to prevent
+(chroma-clamped `boxblur`, odd source dimensions, out-of-bounds regions, empty filter
+segments, both modes, time windows, multi-region chaining). It stubs nothing but also
+never calls `ffprobe`, so it runs anywhere Python 3 is installed:
+
+```bash
+python3 skills/redact-demo-recording/test_build_filtergraph.py
+# or, from that directory:
+pytest test_build_filtergraph.py
+```
+
+Any change to `build_filtergraph.py` should keep these green.
