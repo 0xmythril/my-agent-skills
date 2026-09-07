@@ -73,6 +73,7 @@ Extra keys are included only when they help a specific runtime and are safe for 
 | [babysit-github-pr](skills/babysit-github-pr/SKILL.md) | Poll a GitHub PR, post cycle comments, fix actionable review/CI issues until merge-ready or limits hit. |
 | [promote-branch-pr](skills/promote-branch-pr/SKILL.md) | Compare two branches, open a promotion PR if the target is behind, and optionally hand off to babysit-github-pr. |
 | [protected-prototype-hosting](skills/protected-prototype-hosting/SKILL.md) | Publish static prototypes behind a shared login on Cloudflare, with credentials stored outside repositories. |
+| [storm-research-workflow](skills/storm-research-workflow/SKILL.md) | 4-prompt Stanford STORM–style deep-research workflow that surfaces multi-perspective evidence, contradictions, and blind spots before writing or deciding. |
 
 For protected prototype hosting, the default username is `moca`. Provision `PREVIEW_PASSWORD` separately in `~/.config/moca-skills/secrets/prototype-hosting.env` (owner-only permissions), or point `MOCA_PROTOTYPE_SECRETS_FILE` to an external credential file. The password is intentionally absent from this repository. Install this skill using the same copy/symlink approach above, substituting `protected-prototype-hosting` for the example skill name.
 

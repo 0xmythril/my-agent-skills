@@ -138,6 +138,7 @@ Now peer review your own research briefing:
 2. **Don't skip Prompt 2.** The contradiction map is the highest-value step — true understanding lives in the disagreements, not the consensus.
 3. **Swap personas if needed.** The default set (Practitioner, Academic, Skeptic, Economist, Historian) works for most domains. For technical topics you might swap in *Security Researcher* or *Regulator*; for creative topics, *Critic* or *Consumer*.
 4. **No live web search.** These prompts rely on the model's parametric knowledge. If you need real-time citations or post-cutoff facts, run the official open-source `knowledge-storm` pipeline (DSPy-backed, litellm-compatible) instead.
+5. **Temperature matters.** Use a creative temperature (~1.0) for Prompt 1 so personas diverge; use a lower temperature (~0.3) for Prompt 4 so the audit is strict.
 
 ## Variation: Web-Amplified STORM for Emerging Standards & Competitive Landscapes
 
@@ -176,7 +177,6 @@ For product/strategy research, add a final synthesis artifact:
 - **Search-query bias**: If all queries are crypto-native, the synthesis skews anti-incumbent. Deliberately include TradFi/regulatory queries.
 - **URL decay**: Web-extracted content can be truncated. For paywalled or critical sources, use `browser_navigate` + `browser_snapshot` to capture the full page.
 - **Conflicting definitions**: Terms like "tokenization" mean entirely different things in PCI vs blockchain contexts. Surface these definitional collisions explicitly in the contradiction map.
-5. **Temperature matters.** Use a creative temperature (~1.0) for Prompt 1 so personas diverge; use a lower temperature (~0.3) for Prompt 4 so the audit is strict.
 
 ## Variations
 
