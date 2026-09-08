@@ -73,8 +73,29 @@ Extra keys are included only when they help a specific runtime and are safe for 
 | [babysit-github-pr](skills/babysit-github-pr/SKILL.md) | Poll a GitHub PR, post cycle comments, fix actionable review/CI issues until merge-ready or limits hit. |
 | [promote-branch-pr](skills/promote-branch-pr/SKILL.md) | Compare two branches, open a promotion PR if the target is behind, and optionally hand off to babysit-github-pr. |
 | [protected-prototype-hosting](skills/protected-prototype-hosting/SKILL.md) | Publish static prototypes behind a shared login on Cloudflare, with credentials stored outside repositories. |
+| [redact-demo-recording](skills/redact-demo-recording/SKILL.md) | Blur emails/faces/keys out of a screen recording, strip audio, cut or speed up segments, and export a shareable mp4. |
 
 For protected prototype hosting, the default username is `moca`. Provision `PREVIEW_PASSWORD` separately in `~/.config/moca-skills/secrets/prototype-hosting.env` (owner-only permissions), or point `MOCA_PROTOTYPE_SECRETS_FILE` to an external credential file. The password is intentionally absent from this repository. Install this skill using the same copy/symlink approach above, substituting `protected-prototype-hosting` for the example skill name.
+
+### Retire the older `pr-staging-to-sandbox` skill
+
+`promote-branch-pr` supersedes the older hardcoded `pr-staging-to-sandbox` skill (same
+workflow, but repo/source/target were baked in). Leaving both installed is actively
+harmful: `pr-staging-to-sandbox` has a narrower, more specific description, so agent
+skill-matching keeps picking it for any "promote staging to sandbox" request even after
+you install the generalised replacement — the same drift that motivated PR #5.
+
+This repo has never carried `pr-staging-to-sandbox`, so there is nothing to delete here.
+Remove any local copy you installed previously:
+
+```bash
+rm -rf ~/.claude/skills/pr-staging-to-sandbox
+rm -rf ~/.cursor/skills/pr-staging-to-sandbox
+rm -rf ~/.hermes/skills/*/pr-staging-to-sandbox   # if grouped by category
+```
+
+After removing it, verify `promote-branch-pr` is installed (see Install above) so the
+generalised skill is the only match remaining.
 
 ## Contributing
 
